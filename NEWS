@@ -1,0 +1,27 @@
+
+The ChangeLog for unknownR is the SVN commit log itself :
+    $ svn log svn://svn.r-forge.r-project.org/svnroot/unknownR
+
+This NEWS file summarises the main changes.
+
+        *****************************************
+        **                                     **
+        **   CHANGES IN UNKNOWNR VERSION 0.2   **
+        **                                     **
+        *****************************************
+        
+NEW FEATURES
+
+    o
+
+BUG FIXES
+
+    o
+
+        ********************************************
+        **                                        **
+        **   VERSION 0.1 RELEASED CRAN MMM YYYY   **
+        **                                        **
+        ********************************************
+
+
