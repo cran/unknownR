@@ -12,15 +12,39 @@ This NEWS file summarises the main changes.
         
 NEW FEATURES
 
-    o
+    o   unk gains delay and redDelay arguments: the number of
+        seconds each function is displayed (3) and then turned
+        red (2).
+        
+    o   unk gains pkgs argument, by default c("base","utils").
+        Any set of packages can be passed here, as suggested
+        by Jean-Robert Avettand-Fenoel (FR#1320). Accordingly,
+        ~/.knowns.Rdata now saves the package of each function
+        for cases where the same function name is in several
+        packages.
+        
+    o   The .Rd manual page is retrieved and functions from
+        internal pages (such as ns-internal and base-internal)
+        are filtered, reducing 878 to 809 (as of R 2.12.1).
+        
+    o   learn() now saves a learn()-ed status to .knowns.Rdata
+        so you can come back to learn() later and continue
+        where you left off. Thanks to Sean O'Riordain for the
+        suggestion.
+        
+    o   unk() no longer returns 'tolearn'. learn() reads this
+        from .knowns.Rdata directly. Thanks to Sean O'Riordain
+        for the suggestion.
+        
+    o   The top 30 (by default) packages from Crantastic are
+        included in the list (FR#1042), as are all base and
+        recommended packages.
 
-BUG FIXES
 
-    o
 
         ********************************************
         **                                        **
-        **   VERSION 0.1 RELEASED CRAN MMM YYYY   **
+        **   VERSION 0.1 RELEASED CRAN MAR 2011   **
         **                                        **
         ********************************************
 

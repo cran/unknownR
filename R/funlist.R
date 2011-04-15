@@ -1,12 +1,17 @@
-funlist = function() {
+funlist = function(pkgs,top) {
     # list all functions in base and utils which we would
     # like to 'know'. Exclude the many as.* methods, just
     # including "as" once for example. Include non-methods
     # that may look like methods such as 'write.table'.
+    # Exclude functions in help file ns-internal and similar.
     require(tcltk)
-    xx = sort(c(objects(pos="package:base"), objects(pos="package:utils")))
-    xx = xx[-grep("[<][-]",xx)]
-    xx = xx[-grep("[?]",xx)]
+    xx = unlist(lapply(pkgs,function(x){
+        ans = objects(paste("package:",x,sep=""))
+        names(ans) = rep(x,length(ans))
+        ans
+    }))
+    xx = xx[grep("[<][-]",xx,invert=TRUE)]
+    xx = xx[grep("[?]",xx,invert=TRUE)]
     defunct = sapply(xx, function(x) {
         thisfun = get(x)
         is.function(thisfun) && length(grep("[.]Defunct", deparse(thisfun)))
@@ -16,7 +21,7 @@ funlist = function() {
     nodots = nodots[!nodots %in% c("UseMethod","|","||")]
     i = 0
     tclServiceMode(FALSE)
-    pb = tkProgressBar("unknownR", "Filtering function list ...", 0, length(nodots))
+    pb = tkProgressBar("unknownR", "Filtering function list ...", 0, 1)
     tclServiceMode(TRUE)
     realmethods = unlist(lapply(nodots, function(x) {
 	    i <<- i + 1
@@ -27,11 +32,9 @@ funlist = function() {
                 return(suppressWarnings(tryCatch(methods(x),error=function(e)NULL)))
             }
         } 
-	    setTkProgressBar(pb,i)  
+	    setTkProgressBar(pb,i/length(nodots))  
         NULL
     }))
-    close(pb)
-    cat("\n");flush.console()
     if (length(grep("^[^.]*$",realmethods))) stop("some methods don't have any .")
     xx = xx[!xx %in% realmethods]
     exclude = c("^as[.].+",
@@ -42,8 +45,51 @@ funlist = function() {
                 "^all.equal[.].+",
                 "^aspell[_].+",
                 "^[^a-zA-Z0-9%]")
-    for (e in exclude) xx = xx[-grep(e,xx)]
+    for (e in exclude) xx = xx[grep(e,xx,invert=TRUE)]
     xx = sort(xx)
-    xx
+    # now find the .Rd page (one page often contains many functions)
+    helppage = character(length(xx))
+    fp = sapply(pkgs,.find.package)
+    setTkProgressBar(pb,label="Filtering manual pages ...",value=0)
+    for (i in seq(along=xx)) {
+        helppage[i] = basename(utils:::index.search(xx[i],fp[names(xx)[i]]))
+        setTkProgressBar(pb,i/length(xx))
+    }
+    close(pb)
+    xx = paste(names(xx),xx,sep=":")
+    names(xx) = helppage
+    # Now remove some "internal" groups we don't think users need.
+    # Obtained using sort(table(names(xx))) and looked at the largest groups manually
+    # Removes 69 functions at the time of writing (R 2.12.1)
+    before =  length(xx)
+    remove = c("ns-internal",
+               "sys.parent",
+               "SweaveUtils",
+               "numeric_version", # seems to be 7 different R version functions
+               "ns-reflect",
+               "bindenv",
+               "converters",
+               "base-internal")
+    xx=xx[!names(xx) %in% remove]
+    xx = xx[grep("-deprecated",names(xx),invert=TRUE)]
+    # cat("Reduced",before,"to",length(xx),"using manual filter on .Rd names\n")
+    
+    pkgs = rownames(installed.packages(priority="high"))  # base and recommended
+    pkgs = pkgs[!pkgs %in% c("base","utils")]
+    if (top>0) {
+        setTimeLimit(elapsed=10)
+        cat("Reading toppkgs ...");flush.console()
+        toppkgs = try(read.table("http://unknownr.r-forge.r-project.org/toppkgs.csv",skip=1,sep=",",header=TRUE,stringsAsFactors=FALSE))
+        setTimeLimit(elapsed=Inf)
+        if (inherits(toppkgs,"try-error")) { 
+            cat("likely internet connection problem. Continuing without packages this time.\n")
+        } else {
+            cat("done.\n")
+            assign(".unk.toppkgs",toppkgs,.GlobalEnv)
+            pkgs = sort(unique(c(head(toppkgs$pkgs,top),pkgs)))
+        }
+    }
+    pkgs = paste("PACKAGE",pkgs,sep=":")
+    c(xx,pkgs)
 }
 

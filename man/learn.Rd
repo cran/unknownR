@@ -2,16 +2,18 @@
 \alias{learn}
 \title{ Run learn() after unk() }
 \description{
-  Displays help for the known unknowns returned by \code{unk()}.
+  Displays help for the known unknowns saved by \code{unk()}.
 }
 \usage{
-learn(x=get("tolearn"))
+learn(pkgs=NULL,relearn=FALSE,fnam = path.expand("~/.knowns.Rdata"))
 }
 \arguments{
-  \item{x}{ A character vector of function names. Typically \code{unk()} creates \code{tolearn} in the global environment. }
+  \item{pkgs}{ A character vector of package names. NULL means all known unknowns from any package \code{unk()} has been passed. }
+  \item{relearn}{ Reread the manual pages again, even though you already \code{learn()}-ed them. }
+  \item{fnam}{ Same as \code{fnam} in \code{unk()} }
 }
 \details{
-  \code{help()} is called on each function name. Press ENTER for the next function. No status is changed by running \code{learn()}; run \code{unk()} afterwards to do that.
+  \code{help()} is called on each function name. Press ENTER for the next function. ~/.knowns.Rdata is updated to "learn()-ed" status as each function's help page is displayed. Run \code{unk()} afterwards when you know them.
   
   We recommend you set \code{options(help_type="html")} so that help is displayed in your internet browser. It may be convenient to resize the browser to fill most of your screen, with the R prompt shrunk and non-overlapping with the browser. It is then easier to put focus back the R prompt (to press ENTER) after you have clicked the browser to scroll or follow links.
   
@@ -45,6 +47,7 @@ If you know how to make Safari or Chrome use the current tab for external applic
 \value{
    Nothing. 
 }
+\seealso{ \code{\link{unk}} }
 \references{
 Homepage: \url{http://unknownr.r-forge.r-project.org/}
 }
