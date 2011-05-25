@@ -52,10 +52,25 @@ funlist = function(pkgs,top) {
     fp = sapply(pkgs,.find.package)
     setTkProgressBar(pb,label="Filtering manual pages ...",value=0)
     for (i in seq(along=xx)) {
-        helppage[i] = basename(utils:::index.search(xx[i],fp[names(xx)[i]]))
+        thishelppage = utils:::index.search(xx[i], fp[names(xx)[i]])
+        helppage[i] = if(length(thishelppage)) basename(thishelppage) else ""
         setTkProgressBar(pb,i/length(xx))
     }
     close(pb)
+
+    # Remove functions with no help page. Only known reason for this is that
+    # objects assigned in Rprofile.site are installed into base.
+    # Thanks to Richard Cotton for reporting bug #1403 and the fix.
+    remove = which(helppage=="")
+    if (length(remove)) {
+        if (!all(names(xx)[remove]=="base")) {
+            tt = xx[remove][names(xx)[remove]!="base"]
+            warning("Removed some objects without help pages that aren't in base (i.e. aren't assigned by your Rprofile.site):",paste(tt,collapse=","))
+        } # else cat("Excluding objects in base that are assigned in Rprofile.site:",paste(xx[remove],collapse=","),"\n")
+        xx = xx[-remove]
+        helppage = helppage[-remove]
+    }
+    
     xx = paste(names(xx),xx,sep=":")
     names(xx) = helppage
     # Now remove some "internal" groups we don't think users need.
