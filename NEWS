@@ -7,6 +7,19 @@ This NEWS file summarises the main changes.
 
         *****************************************
         **                                     **
+        **   CHANGES IN UNKNOWNR VERSION 0.4   **
+        **                                     **
+        *****************************************
+
+o installed.packages() now called with lib.loc=.Library as requested
+  by Prof Ripley for efficiency when all packages are installed.
+
+o onAttach now uses packageStartupMessage.
+
+
+
+        *****************************************
+        **                                     **
         **   CHANGES IN UNKNOWNR VERSION 0.3   **
         **                                     **
         *****************************************

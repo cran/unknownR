@@ -26,16 +26,26 @@ popcon = function(scrape=TRUE) {
         # now fetch the number of votes (which is only on the detail page for each package)
         numvotes = sapply(popcon$pkgs, function(i){
             cat("Fetching",i,"from Crantastic ... ")
-            html = scan(paste(crantasticpath,gsub("[.]","-",i),sep=""),character(),quiet=TRUE)
-            ans = as.integer(gsub("[(]","",html[grep("vote.*)",html)-1])[1])
-            if (is.na(ans) || ans<0) stop("likely format error (Crantastic)")
+            tt = try(html <- scan(paste(crantasticpath,gsub("[.]","-",i),sep=""),character(),quiet=TRUE))
+            if (inherits(tt,"try-error")) {
+                cat("Crantastic link error, using 0 for this package\n")
+                ans = 0
+            } else {
+                ans = as.integer(gsub("[(]","",html[grep("vote.*)",html)-1])[1])
+                if (is.na(ans) || ans<0) {
+                    cat("Try rerunning, otherwise possible format error (Crantastic).\n")
+                    browser()
+                    ans = 0
+                }
+            }
             cat(ans,"\n")
             ans
         })
         # fetch the votes from Inside-R 
         insidervotes = sapply(popcon$pkgs, function(i) {
             cat("Fetching",i,"from Inside-R ... ")
-            html = scan(paste(insiderpath,i,sep=""),character(),quiet=TRUE)
+            html = try(scan(paste(insiderpath,i,sep=""),character(),quiet=TRUE))
+            if (inherits(html,"try-error")) return(0)  # e.g. maxent had no page yet on Inside-R on 24 Aug
             ans = html[grep("vote.*>[0-9]+<",html)]
             if (!length(ans)) return(0)  # some pkgs had no votes showing on Inside-R
             ans = as.integer(sapply(strsplit(ans,split="[<>]"),"[",4))[1]
@@ -55,7 +65,7 @@ popcon = function(scrape=TRUE) {
         ans$rank = 1:nrow(ans)
         rownames(ans) = NULL
         ans = ans[,c("pkgs","avgvote","numvotes","users","score","rank","crantasticrank","insidervotes")]
-        colnames(ans)[7:8] = c("Crantastic.rank","Inside-R.votes")
+        colnames(ans)[7:8] = c("Crantastic Rank","Inside-R Votes")
         save(list="ans",file="ans.Rdata")
     } else load("ans.Rdata")
     
@@ -70,7 +80,7 @@ popcon = function(scrape=TRUE) {
     p = openPage(fnam, link.css="hwriter.css")
     hwrite('<br>This package list is compiled and used by <a href="http://unknownr.r-forge.r-project.org/">unknownR</a> to help users<br>easily and quickly discover useful packages rated by other users. By<br>',p)
     hwrite('default the top 30 are included in unknownR\'s list (plus R-core<br>recommended packages included in R).<br><br>',p)    
-    hwrite(c('Data is scraped from Crantastic and Inside-R. See',hwrite('footnote', link='#footnote'),'.<br>'),p,table=FALSE)
+    hwrite(paste('Data is scraped from Crantastic and Inside-R; see ',hwrite('footnote', link='#footnote'),'.<br>',sep=""),p)
     hwrite('Note that Inside-R appears to multiply the number of votes by a scaling factor.<br><br>',p)
     colnames(ans)[1]="CRAN package"
     hwrite(ans, p, row.names=FALSE,
@@ -78,10 +88,12 @@ popcon = function(scrape=TRUE) {
                    row.bgcolor=list('#aaffaa'),
                    row.style=list('font-weight:bold'),
                    col.style=list(avgvote='text-align:right',users='text-align:right',numvotes='text-align:right',score='text-align:right',rank='text-align:right',Crantastic.rank='text-align:right',"Inside-R.votes"='text-align:right'),
-                   col.links=list("CRAN package"=paste("http://www.inside-r.org/packages/cran/",ans[,1],sep="")))
+                   col.links=list("CRAN package"=paste(crantasticpath,ans[,1],sep=""),
+                                  "Crantastic Rank"=paste(crantasticpath,ans[,1],sep=""),
+                                  "Inside-R Votes"=paste(insiderpath,ans[,1],sep="")))
     
     hwrite('<br><a href="http://crantastic.org/popcon">Crantastic\'s ranking</a> seems inappropriate for unknownR\'s needs:<br>',p,name="footnote")
-    hwrite('<ul><li>Packages with just one single vote (5*) are ranked highly because they have the maximum vote of 5.000.',p)
+    hwrite('<ul><li>Packages with just one 5* vote (and no other votes) are ranked first because they have the maximum vote of 5.000.',p)
     hwrite('<li>ggplot2 is ranked 41st (when writing this), which doesn\'t seem correct given it has the most votes and the most users, by far.',p)
     hwrite('<li>Some packages on page <a href="http://crantastic.org/popcon?page=2">2</a> and <a href="http://crantastic.org/popcon?page=3">3</a> have many votes and users, but are harder to find.</ul>',p)
     hwrite('The data is scraped and a default 3* vote is added to each package to address these issues.<br>',p)

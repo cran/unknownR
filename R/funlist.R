@@ -89,7 +89,7 @@ funlist = function(pkgs,top) {
     xx = xx[grep("-deprecated",names(xx),invert=TRUE)]
     # cat("Reduced",before,"to",length(xx),"using manual filter on .Rd names\n")
     
-    pkgs = rownames(installed.packages(priority="high"))  # base and recommended
+    pkgs = rownames(installed.packages(lib.loc=.Library,priority="high"))  # base and recommended
     pkgs = pkgs[!pkgs %in% c("base","utils")]
     if (top>0) {
         setTimeLimit(elapsed=10)

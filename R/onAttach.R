@@ -1,8 +1,8 @@
 ".onAttach"=function(libname, pkgname) {
-    cat("unknownR",as.character(packageVersion("unknownR")),"\n")
-    cat("   Run unk() first, then learn()\n")
-    cat("   Others have found it helpful to first read the short presentation\n")
-    cat("   on the homepage: http://unknownr.r-forge.r-project.org/\n")
-    cat("   Please read ?unk and ?learn, too.\n")
+    packageStartupMessage("unknownR",as.character(packageVersion("unknownR")),"\n")
+    packageStartupMessage("   Run unk() first, then learn()\n")
+    packageStartupMessage("   Others have found it helpful to first read the short presentation\n")
+    packageStartupMessage("   on the homepage: http://unknownr.r-forge.r-project.org/\n")
+    packageStartupMessage("   Please read ?unk and ?learn, too.\n")
 }
 

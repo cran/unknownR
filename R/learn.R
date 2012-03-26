@@ -7,7 +7,7 @@ learn=function(pkgs=NULL,relearn=FALSE,fnam = path.expand("~/.knowns.Rdata"))
     if (is.null(names(knowns)) || any(duplicated(names(knowns)))) stop("Either knowns in ",fnam," has no names, or there is a duplicate in the names")
 	if (!identical(grep(":",names(knowns)),seq(1,length(knowns)))) stop("':' does not exist in all names(knowns)")
 	tolearn = knowns
-	basepackages = rownames(installed.packages(priority="base"))
+	basepackages = rownames(installed.packages(lib.loc=.Library,priority="base"))
 	
 	if (!is.null(pkgs)) {
 	    if (!is.character(pkgs)) stop("pkgs argument needs to be a character vector of package names")

@@ -8,8 +8,8 @@ unk = function(pkgs=c("base","utils"),fnam = path.expand("~/.knowns.Rdata"),top=
     if (redDelay<1) stop("redDelay must be at least 1 second")
     if (is.name(substitute(pkgs))) pkgs = as.character(substitute(pkgs))
     if (top<0 || top>150) stop("top must be between 0 (i.e. crantastic feature off) and 150")
-    recommendedpackages = rownames(installed.packages(priority="recommended"))
-    basepackages = rownames(installed.packages(priority="base"))
+    recommendedpackages = rownames(installed.packages(lib.loc=.Library,priority="recommended"))
+    basepackages = rownames(installed.packages(lib.loc=.Library,priority="base"))
     if (top>0 && exists(".unk.toppkgs")) {
         toppkgs = get(".unk.toppkgs")
         rownames(toppkgs) = toppkgs$pkgs
